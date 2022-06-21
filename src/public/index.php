@@ -7,8 +7,23 @@ $pdo = new PDO(
   $dbPassword
 );
 
-$sql = "SELECT * FROM memo";
+// $sql = "SELECT * FROM memo";
+// $statement = $pdo->prepare($sql);
+// $statement->execute();
+// $memo = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+if (isset($_GET['search'])) {
+  $title = '%' . $_GET['search'] . '%';
+  $content = '%' . $_GET['search'] . '%';
+} else {
+  $title = '%%';
+  $content = '%%';
+}
+
+$sql = "SELECT * FROM memo WHERE title LIKE :title OR content LIKE :content ORDER BY id $direction";
 $statement = $pdo->prepare($sql);
+$statement->bindValue(':title', $title, PDO::PARAM_STR);
+$statement->bindValue(':content', $content, PDO::PARAM_STR);
 $statement->execute();
 $memo = $statement->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -21,9 +36,9 @@ $memo = $statement->fetchAll(PDO::FETCH_ASSOC);
 </head>
 
 <body>
-  <form action="search.php" method="post">
-    <input type="text" name="title" placeholder="タイトルキーワードを入力" value="<?php echo $_POST['title']?>" >
-    <input type="text" name="content" placeholder="内容キーワードを入力" value="<?php echo $_POST['content']?>">
+  <form action="index.php" method="get">
+    <input name="search" type="text" value="<?php echo $_GET['search'] ??
+                ''; ?>" placeholder="キーワードを入力" />
     <input type="submit" name="submit" value="検索">
     <a href = "create.php"><p>メモ追加</p></a>
   </form>
